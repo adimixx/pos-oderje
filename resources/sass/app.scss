@@ -1,0 +1,45 @@
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Montserrat&display=swap');
+// Variables
+@import 'variables';
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+@import 'node_modules/bootstrap-vue/src/index.scss';
+@import 'node_modules/@fortawesome/fontawesome-free/scss/fontawesome.scss';
+@import '~@fortawesome/fontawesome-free/scss/solid.scss';
+@import "cashier";
+
+* {
+    padding: 0;
+    margin: 0;
+}
+
+html, body {
+    min-height: 100% !important;
+    height: 100%;
+}
+
+body > * {
+    flex-shrink: 0;
+}
+
+.cardMain {
+    font-size: 2rem;
+}
+
+#loginbg {
+    background-image: url("/assets/img/bg-login.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+    width: 100%;
+}
+
+.login-image {
+    background: url("/assets/img/logo-oderje.png");
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    height: 120px;
+}

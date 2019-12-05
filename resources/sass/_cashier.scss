@@ -1,0 +1,17 @@
+*{padding: 0;
+margin: 0;}
+
+html, body{
+    min-height: 100% !important;
+    height: 100%;
+}
+
+body > * {
+    flex-shrink: 0;
+}
+
+#newOrder{
+    height: 90px;
+    background-color: $orange;
+}
+
