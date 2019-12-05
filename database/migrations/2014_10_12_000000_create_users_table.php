@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->integer('created_by');
             $table->integer('ojdb_pruser')->nullable();
             $table->string('status')->nullable();
-            $table->string('api_token',80)->after('password')->unique()->nullable()->default(null);
+            $table->string('api_token',80)->unique()->nullable()->default(null);
             $table->rememberToken();
             $table->timestamps();
             $table->foreign('ojdb_pruser')->references('u_id')->on('v2tpdev.PRUSER');

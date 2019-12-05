@@ -20,13 +20,14 @@ use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use phpDocumentor\Reflection\Types\Integer;
 use PhpParser\Node\Expr\Array_;
+use Spatie\Permission\Models\Permission;
 
 class CashierController extends Controller
 {
 
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware(['permission:pos']);
     }
 
     public function listItem(Request $request)

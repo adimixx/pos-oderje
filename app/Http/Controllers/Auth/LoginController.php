@@ -110,15 +110,17 @@ class LoginController extends Controller
 
         if (method_exists($this, 'hasTooManyLoginAttempts') && $this->hasTooManyLoginAttempts($request)) {
             $this->fireLockoutEvent($request);
-
             return $this->sendLockoutResponse($request);
         }
 
         $merchantCookie = $request->cookie('merchant');
         $businessCookie = $request->cookie('business');
-        $credentials = $this->loginBusinessMerchant($request->username, $request->password, $businessCookie, $merchantCookie);
 
-        if (empty($credentials)) {
+        if (isset($merchantCookie) || isset($businessCookie)){
+            $credentials = $this->loginBusinessMerchant($request->username, $request->password, $businessCookie, $merchantCookie);
+        }
+
+        else {
             $credentials = $this->loginInitMachine($request->username, $request->password);
         }
 
@@ -126,6 +128,8 @@ class LoginController extends Controller
             $this->incrementLoginAttempts($request);
             return $this->sendFailedLoginResponse($request);
         }
+
+
         if (Auth::attempt($credentials)) {
             //get Machine type cache
             $machine = $request->cookie('machine');
