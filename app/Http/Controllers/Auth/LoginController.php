@@ -14,8 +14,11 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Hash;
+use phpDocumentor\Reflection\Element;
+use Webpatser\Uuid\Uuid;
 
 class LoginController extends Controller
 {
@@ -89,17 +92,10 @@ class LoginController extends Controller
 
     public function loginInitMachine($username, $password)
     {
-        $credentials = null;
-        $user = User::where('username', $username)->first();
-        if (isset($user->ojdb_pruser)) {
-            $user_group = $user->pruser()->first()->flc_user_group->first()->GROUP_ID;
-            if ($user_group === 2 || $user_group === 3) {
-                $credentials = [
-                    'username' => $username,
-                    'password' => $password
-                ];
-            }
-        }
+        $credentials = [
+            'username' => $username,
+            'password' => $password
+        ];
         return $credentials;
     }
 
@@ -116,50 +112,64 @@ class LoginController extends Controller
         $merchantCookie = $request->cookie('merchant');
         $businessCookie = $request->cookie('business');
 
-        if (isset($merchantCookie) || isset($businessCookie)){
+        if (isset($merchantCookie) || isset($businessCookie)) {
             $credentials = $this->loginBusinessMerchant($request->username, $request->password, $businessCookie, $merchantCookie);
-        }
 
-        else {
+            if (empty($credentials)) {
+                $this->incrementLoginAttempts($request);
+                return $this->sendFailedLoginResponse($request);
+            }
+
+        } else {
             $credentials = $this->loginInitMachine($request->username, $request->password);
         }
 
-        if (empty($credentials)) {
-            $this->incrementLoginAttempts($request);
-            return $this->sendFailedLoginResponse($request);
-        }
-
-
-        if (Auth::attempt($credentials)) {
-            //get Machine type cache
-            $machine = $request->cookie('machine');
+        if ($credentials !== null && Auth::attempt($credentials)) {
             $uuid = $request->cookie('uuid');
+            $ip = request()->ip();
+            $role = Auth::user()->getRoleNames()->toArray();
 
-            $device = device::where('uuid', $uuid)->first();
+            if (!isset($uuid)) {
+                $lifetime = time() + 60 * 60 * 24 * 365; // one year
 
-            if ($machine == 1 && isset($uuid)) {
-                $lastLogin = user_log::where('user_id', \Illuminate\Support\Facades\Auth::user()->getAuthIdentifier())->orderBy('id','desc')->first();
-                if ($lastLogin !== null) $lastLogin->update(['log_out' => true]);
+                $device = new device();
+                $uuid = (string)Uuid::generate();
+                Cookie::queue('uuid', $uuid, $lifetime);
 
-                user_log::Create([
-                    'user_id' => Auth::user()->getAuthIdentifier(),
-                    'device_id' => $device->id,
-                    'log_out' => false
-                ]);
-
-                return redirect()->route('cashier');
+                $device->uuid = $uuid;
+                $device->ip_address = $ip;
+                $device->status = "INIT";
+                $device->save();
             } else {
-                return redirect()->route('conf');
+                $device = device::where('uuid', $uuid)->orWhere('ip_address', $ip)->first();
             }
-        } else {
-            $this->incrementLoginAttempts($request);
-            return $this->sendFailedLoginResponse($request);
+
+            $lastLogin = user_log::where('user_id', Auth::user()->getAuthIdentifier())->orderBy('id', 'desc')->where('log_out', false)->first();
+            if ($lastLogin !== null) $lastLogin->update(['log_out' => true]);
+            user_log::Create([
+                'user_id' => Auth::user()->getAuthIdentifier(),
+                'device_id' => $device->id,
+                'log_out' => false
+            ]);
+
+            if (array_search("Merchant Admin", $role) || array_search("Business Admin", $role)) {
+                if ($device->machine_type == 1) {
+                    return redirect()->route('cashier');
+                }
+            } else if (array_search("Super Admin", $role)) {
+                return redirect()->route('conf');
+            } else if (array_search("Cashier", $role)) {
+                return redirect()->route('home');
+            }
         }
+        $this->incrementLoginAttempts($request);
+        return $this->sendFailedLoginResponse($request);
+
     }
 
     public function logout(Request $request)
     {
-        $lastLogin = user_log::where('user_id', \Illuminate\Support\Facades\Auth::user()->getAuthIdentifier())->orderBy('id','desc')->first();
+        $lastLogin = user_log::where('user_id', \Illuminate\Support\Facades\Auth::user()->getAuthIdentifier())->orderBy('id', 'desc')->first();
         if ($lastLogin !== null) $lastLogin->update(['log_out' => true]);
 
         $this->guard()->logout();

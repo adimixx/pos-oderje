@@ -121,8 +121,8 @@
                                     <div class="col-lg-9">
                                         <select id="merchant" name="merchant" class="form-control form-control-lg">
                                             @foreach($merchant as $in2)
-                                                <option value="{{$in2['m_id']}}"
-                                                        @isset($currentSetting['merchant']) @if($currentSetting['merchant']->m_id == $in2['m_id'])  selected @endif @endisset>{{$in2->description}}</option>
+                                                <option value="{{$in2->m_id}}"
+                                                        @isset($currentSetting['merchant']) @if($currentSetting['merchant']->m_id == $in2->m_id)  selected @endif @endisset>{{$in2->m_name}}</option>
                                             @endforeach
                                         </select>
                                     </div>

@@ -61,6 +61,8 @@ class UserManagementController extends Controller
                         'created_by' => $pruser->u_id,
                         'ojdb_PRUSER' => $pruser->u_id,
                     ]);
+
+
                 } elseif ($UserGroup === 3) {
                     $data = User::Create([
                         'username' => $pruser->u_username,

@@ -17,6 +17,7 @@ class userSeed extends Seeder
         $permission2 = Permission::create(['name'=>'conf']);
         $permission3 = Permission::create(['name'=>'report']);
         $roleAdmin = Role::create(['name'=>'Super Admin']);
+        $roleAdmin->givePermissionTo($permission2);
 
         $role = Role::create(['name'=>'Business Admin']);
         $role->givePermissionTo($permission1);
@@ -40,6 +41,7 @@ class userSeed extends Seeder
         ]);
 
         $user->assignRole($roleAdmin);
+        $user->assignRole($role);
 
 
         \App\machine_type::Create([
