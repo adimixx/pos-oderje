@@ -20,6 +20,7 @@ Route::post('/login', 'Auth\LoginController@login')->name('login');
 Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/cashier', 'CashierController@index')->name('cashier');
+Route::post('/cashier', 'CashierController@recordStartMoney')->name('startMoney');
 Route::get('/cashier/list', 'CashierController@listItem')->name('cashierList');
 Route::post('/cashier/save', 'CashierController@transactionRecord')->name('transactionRecord');
 

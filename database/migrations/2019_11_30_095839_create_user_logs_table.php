@@ -17,6 +17,9 @@ class CreateUserLogsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('device_id');
+            $table->integer('start_money')->nullable();
+            $table->integer('end_money')->nullable();
+            $table->integer('calculated_end_money')->nullable();
             $table->boolean('log_out');
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users');

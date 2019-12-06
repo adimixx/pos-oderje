@@ -8,13 +8,11 @@ use App\User;
 use App\v2tpdev_pruser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class UserManagementController extends Controller
 {
     public function listUser(Request $request)
     {
-        return csrf_token();
         $userList = null;
         $error = null;
 
@@ -61,7 +59,7 @@ class UserManagementController extends Controller
                         'created_by' => $pruser->u_id,
                         'ojdb_PRUSER' => $pruser->u_id,
                     ]);
-
+                    $data->assignRole('Business Admin');
 
                 } elseif ($UserGroup === 3) {
                     $data = User::Create([
@@ -72,6 +70,7 @@ class UserManagementController extends Controller
                         'created_by' => $pruser->u_id,
                         'ojdb_PRUSER' => $pruser->u_id,
                     ]);
+                    $data->assignRole('Merchant Admin');
                 }
             }
         }

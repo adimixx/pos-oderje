@@ -3,24 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\collection;
-use App\device;
 use App\ojdb_bill;
 use App\ojdb_business;
 use App\ojdb_customer_order;
 use App\ojdb_merchant;
-use App\ojdb_product;
 use App\ojdb_product_business_merchant;
 use App\ojdb_transaction;
 use App\users_merchant;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\DB;
-use phpDocumentor\Reflection\Types\Integer;
-use PhpParser\Node\Expr\Array_;
-use Spatie\Permission\Models\Permission;
 
 class CashierController extends Controller
 {
@@ -63,10 +55,23 @@ class CashierController extends Controller
         $machine = Cache::get('machine');
         $merchantCache = Cache::get('merchant');
         $businessCache = Cache::get('business');
+        $start_money = Auth::user()->userlog()->where('log_out','false')->first()->start_money;
+        if ($start_money === null) return view('CashierPanel_StartMoney');
 
         $priceUnit = "RM";
         $taxSetting = 0.06;
         return view('CashierPanel_Main', compact('priceUnit', 'taxSetting'));
+    }
+
+    public function recordStartMoney (Request $request){
+        $validated = $request->validate(['start'=>'required|numeric']);
+
+        $start = $validated->start;
+        $userlog = Auth::user()->userlog()->where('log_out','false')->first();
+        $userlog->start_money = $start;
+        $userlog->save();
+
+        return redirect()->route('cashier');
     }
 
     public function transactionRecord(Request $request)
