@@ -54,15 +54,18 @@ class LoginController extends Controller
 
     public function showLoginForm(Request $request)
     {
+        ini_set( 'session.cookie_httponly', false);
+        ini_set("session.cookie_secure", false);
+
         $merchantCookie = $request->cookie('merchant');
         $businessCookie = $request->cookie('business');
         $machineOwner = null;
 
         if (isset($merchantCookie)) {
-            $machineDetails = ojdb_merchant::find($merchantCookie)->first(['m_id', 'm_name as name']);
+            $machineDetails = ojdb_merchant::find($merchantCookie,['m_id', 'm_name as name']);
             $machineOwner = "Merchant";
         } elseif (isset($businessCookie)) {
-            $machineDetails = ojdb_business::find($businessCookie)->first(['b_id', 'b_name as name']);
+            $machineDetails = ojdb_business::find($businessCookie,['b_id', 'b_name as name']);
             $machineOwner = "Business";
         } else {
             $machineDetails = null;
@@ -156,6 +159,7 @@ class LoginController extends Controller
                 if ($device->machine_type == 1) {
                     return redirect()->route('cashier');
                 }
+                return redirect()->route('home');
             } else if (array_search("Super Admin", $role)) {
                 return redirect()->route('conf');
             } else if (array_search("Cashier", $role)) {

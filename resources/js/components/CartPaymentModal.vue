@@ -126,7 +126,8 @@
                         this.paidAmount = false;
                     } else {
                         axios.post('/cashier/save',{
-                            order: this.cartList
+                            order: this.cartList,
+                            moneyin: this.inputCashNumeric
                         }).then(function (data) {
                             console.log(data);
                         }).catch(function (data) {

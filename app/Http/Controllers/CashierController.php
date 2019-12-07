@@ -66,7 +66,8 @@ class CashierController extends Controller
     public function recordStartMoney (Request $request){
         $validated = $request->validate(['start'=>'required|numeric']);
 
-        $start = $validated->start;
+        $start = ((double)$validated['start']) * 100;
+
         $userlog = Auth::user()->userlog()->where('log_out','false')->first();
         $userlog->start_money = $start;
         $userlog->save();
@@ -78,6 +79,7 @@ class CashierController extends Controller
     {
         $taxSetting = 1.06;
         $order = $request->order;
+        $moneyin = ((double)$request->moneyin) * 100;
         $data = array();
         $total = 0;
 
@@ -108,6 +110,7 @@ class CashierController extends Controller
 
         $collection = new collection();
         $collection->bill_id = $bill->bill_id;
+        $collection->money_in = $moneyin;
         $collection->save();
 
         return array("status" => "ok");

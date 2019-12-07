@@ -44,8 +44,6 @@
                                                class="form-control form-control-user py-5 text-center @error('password') is-invalid @enderror"
                                                id="password" placeholder="Password" name="password" required
                                                autocomplete="password">
-
-
                                         @error('password')
                                         <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
