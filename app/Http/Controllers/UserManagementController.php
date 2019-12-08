@@ -8,95 +8,102 @@ use App\User;
 use App\v2tpdev_pruser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class UserManagementController extends Controller
 {
-    public function listUser(Request $request)
+    public function list(Request $request)
     {
-        $userList = null;
-        $error = null;
+        /* id = PRUSER UserID
+         * type = 1=Business, 2=Merchant
+         * */
 
-        $pruser = v2tpdev_pruser::find($request->id);
-        if (!isset($pruser)) $error = "Invalid user credentials";
-        else {
-            $userGroup = $pruser->flc_user_group->find(2);
-            if (!isset($userGroup)) $userGroup = $pruser->flc_user_group->find(3);
-            if (!isset($userGroup)) $error = "Unauthorised Access";
+        $validatedRequest = (object)$request->validate([
+            'id' => 'required|numeric',
+            'type' => 'required|numeric',
+            'type_id' => 'required|numeric'
+        ]);
 
-            if (isset($pruser->m_id)) {
-                $userList = ojdb_merchant::find($pruser->m_id);
-            } elseif (isset($pruser->b_id) && isset($request->merchant_id)) {
-                $userList = ojdb_business::find($pruser->b_id)->Merchant()->find($request->merchant_id);
-            } else {
-                if (!isset($request->merchant_id)) {
-                    $error = "Merchant id not supplied";
-                } else {
-                    $error = "Database error. Please contact admin";
-                }
+        $data = [];
+        $error = [];
+
+        $pruser = v2tpdev_pruser::find($validatedRequest->id);
+        if (!isset($pruser)) {
+            $error['id'] = ['User does not exist'];
+        } elseif (!isset($pruser->flc_user_group->first()->GROUP_ID)) {
+            $error['id'] = ['Invalid user credentials'];
+        } elseif ($validatedRequest->type === 1 && is_null($pruser->Business()->find($validatedRequest->type_id))) {
+            $error['type_id'] = ['Invalid business id'];
+        } elseif ($validatedRequest->type === 2 && is_null($pruser->Merchant()->find($validatedRequest->type_id))) {
+            $error['type_id'] = ['Invalid merchant id'];
+        } else {
+            if($validatedRequest->type == 1){
+                $data = ojdb_business::find($validatedRequest->type_id)->User()->with('roles')->get();
             }
-        }
-        return (isset($error)) ? ["error" => $error] : ["data" => $userList->User()->get(['id', 'name', 'username', 'status', 'created_at', 'created_by'])];
-    }
-
-    public function adminRegister(Request $request)
-    {
-        $data = null;
-        $error = null;
-
-        $pruser = v2tpdev_pruser::find($request->id);
-        if (!isset($pruser)) $error = "User does not exist";
-        else {
-            $UserGroup = $pruser->flc_user_group->first()->GROUP_ID;
-            if (!isset($pruser)) $error = "Invalid user credentials";
-            else if (($UserGroup != 2 && $UserGroup != 3) || (!isset($pruser->b_id) && !isset($pruser->m_id))) $error = "Unauthorised Access";
             else {
-                if ($UserGroup === 2) {
-                    $data = User::Create([
-                        'username' => $pruser->u_username,
-                        'password' => Hash::make($request->password),
-                        'name' => $pruser->u_fullname,
-                        'business_id' => $pruser->b_id,
-                        'created_by' => $pruser->u_id,
-                        'ojdb_PRUSER' => $pruser->u_id,
-                    ]);
-                    $data->assignRole('Business Admin');
-
-                } elseif ($UserGroup === 3) {
-                    $data = User::Create([
-                        'username' => $pruser->u_username,
-                        'password' => Hash::make($pruser->u_password),
-                        'name' => $pruser->u_fullname,
-                        'merchant_id' => $pruser->m_id,
-                        'created_by' => $pruser->u_id,
-                        'ojdb_PRUSER' => $pruser->u_id,
-                    ]);
-                    $data->assignRole('Merchant Admin');
-                }
+                $data = ojdb_merchant::find($validatedRequest->type_id)->User()->with('roles')->get();
             }
         }
 
-        if (isset($error)) return ["error" => $error];
-        else return ["data" => $data];
+        if (count($error) !== 0) return response()->json(['message' => 'The given data was invalid', 'errors' => $error], 422);
+        else return response()->json(['status' => 'ok', 'data' => $data]);
     }
 
-    public function userRegister(Request $request){
-        $data = null;
-        $error = null;
+    public function register(Request $request)
+    {
+        /* id = PRUSER UserID
+         * role = 1=Admin, 2=Cashier
+         * type = 1=Business, 2=Merchant
+         * */
 
-        $pruser = v2tpdev_pruser::find($request->admin_id);
-        if (!isset($pruser)) $error = "User does not exist";
-        else {
-            $data = User::Create([
-                'username' => $request->username,
-                'password' => (isset($request->password)) ? Hash::make($request->password) : Hash::make('1234'),
-                'name' => (isset($request->name)) ? $request->name : $request->username,
-                'business_id' => (!isset($request->m_id) && isset($pruser->b_id)) ?$pruser->b_id : null,
-                'merchant_id' => (isset($request->m_id))? $request->m_id : $pruser->m_id,
-                'created_by' => $pruser->u_id
-            ]);
+        $validatedRequest = (object)$request->validate([
+            'id' => 'required|numeric',
+            'username' => '',
+            'password' => '',
+            'role' => 'required|numeric',
+            'type' => 'required|numeric',
+            'type_id' => 'required|numeric'
+        ]);
+
+        $data = [];
+        $error = [];
+
+        $pruser = v2tpdev_pruser::find($validatedRequest->id);
+        if (!isset($pruser)) {
+            $error['id'] = ['User does not exist'];
+        } elseif (!isset($pruser->flc_user_group->first()->GROUP_ID)) {
+            $error['id'] = ['Invalid user credentials'];
+        } elseif ($validatedRequest->type === 1 && is_null($pruser->Business()->find($validatedRequest->type_id))) {
+            $error['type_id'] = ['Invalid business id'];
+        } elseif ($validatedRequest->type === 2 && is_null($pruser->Merchant()->find($validatedRequest->type_id))) {
+            $error['type_id'] = ['Invalid merchant id'];
+        } else {
+            //Create new user
+            if (!isset($validatedRequest->username)) {
+                do {
+                    $generateUsername = 'user' . $validatedRequest->type_id . mt_rand(1, 5);
+                    $res = User::where('username', $generateUsername)->first();
+                } while (isset($res));
+
+                $insertData['username'] = $generateUsername;
+            } else $insertData['username'] = $validatedRequest->username;
+            $insertData['password'] = (!isset($validatedRequest->password)) ? Hash::make($insertData['username']) : Hash::make($validatedRequest->password);
+            $insertData['created_by'] = $pruser->u_id;
+            $insertData['name'] = $insertData['username'];
+
+            if ($validatedRequest->type == 1) $insertData['business_id'] = $validatedRequest->type_id;
+            else $insertData['merchant_id'] = $validatedRequest->type_id;
+
+            $data = User::Create($insertData);
+
+            if ($validatedRequest->role == 2) $role = Role::findByName('Cashier');
+            else if ($validatedRequest->type == 1) $role = Role::findByName('Business Admin');
+            else $role = Role::findByName('Merchant Admin');
+
+            $data->assignRole($role);
         }
 
-        if (isset($error)) return ["error" => $error];
-        else return ["data" => $data];
+        if (count($error) !== 0) return response()->json(['message' => 'The given data was invalid', 'errors' => $error], 422);
+        else return response()->json(['status' => 'ok', 'data' => $data]);
     }
 }

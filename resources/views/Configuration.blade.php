@@ -74,8 +74,6 @@
                                     <p class="text-danger">This device has not been set up yet</p>
                                 </div>
                             @endif
-
-
                         </div>
                     </div>
                 </div>

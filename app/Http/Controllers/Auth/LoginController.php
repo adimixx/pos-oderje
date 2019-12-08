@@ -132,7 +132,12 @@ class LoginController extends Controller
             $ip = request()->ip();
             $role = Auth::user()->getRoleNames()->toArray();
 
-            if (!isset($uuid)) {
+            if (isset($uuid))
+            {
+                $device = device::where('uuid', $uuid)->Where('ip_address', $ip)->first();
+            }
+
+            if (!isset($uuid) || $device === null) {
                 $lifetime = time() + 60 * 60 * 24 * 365; // one year
 
                 $device = new device();
@@ -143,8 +148,6 @@ class LoginController extends Controller
                 $device->ip_address = $ip;
                 $device->status = "INIT";
                 $device->save();
-            } else {
-                $device = device::where('uuid', $uuid)->orWhere('ip_address', $ip)->first();
             }
 
             $lastLogin = user_log::where('user_id', Auth::user()->getAuthIdentifier())->orderBy('id', 'desc')->where('log_out', false)->first();
@@ -168,7 +171,6 @@ class LoginController extends Controller
         }
         $this->incrementLoginAttempts($request);
         return $this->sendFailedLoginResponse($request);
-
     }
 
     public function logout(Request $request)

@@ -1871,7 +1871,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2134,7 +2133,8 @@ __webpack_require__.r(__webpack_exports__);
           this.paidAmount = false;
         } else {
           axios.post('/cashier/save', {
-            order: this.cartList
+            order: this.cartList,
+            moneyin: this.inputCashNumeric
           }).then(function (data) {
             console.log(data);
           })["catch"](function (data) {

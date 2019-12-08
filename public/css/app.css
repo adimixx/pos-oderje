@@ -19349,7 +19349,8 @@ body > * {
 }
 
 html,
-body {
+body,
+#app {
   min-height: 100% !important;
   height: 100%;
 }
@@ -19362,7 +19363,7 @@ body > * {
   font-size: 2rem;
 }
 
-#loginbg {
+#login {
   background-image: url("/assets/img/bg-login.jpg");
   background-position: center;
   background-repeat: no-repeat;
@@ -19371,7 +19372,7 @@ body > * {
   width: 100%;
 }
 
-.login-image {
+#login-logo {
   background: url("/assets/img/logo-oderje.png");
   background-position: center;
   background-size: contain;

@@ -14,10 +14,16 @@ class ConfigurationController extends Controller
     public function Index(Request $request)
     {
         $machineType = machine_type::all();
+        if (in_array("Business Admin", Auth::user()->getRoleNames()->toArray())) {
+            $business = Auth::user()->business()->first();
+            $merchant = $business->merchant()->get();
+        }
 
-        $ojdb_pruser = Auth::user()->pruser()->first();
-        $business = $ojdb_pruser->business()->first();
-        $merchant = $business->merchant()->get();
+        else if(in_array("Merchant Admin", Auth::user()->getRoleNames()->toArray())) {
+            $merchant = Auth::user()->merchant()->first();
+            $business = $merchant->Business()->first();
+        }
+
         $machine = $request->cookie('machine');
         $merchantCookie = $request->cookie('merchant');
         $businessCookie = $request->cookie('business');
@@ -26,7 +32,7 @@ class ConfigurationController extends Controller
         if ($machine !== null) {
             $currentSetting = array(
                 'business' => $business->find($businessCookie),
-                'machine' => $machineType[$machine-1]
+                'machine' => $machineType[$machine - 1]
             );
 
             if (count($merchant) !== 0) $currentSetting['merchant'] = $merchant->find($merchantCookie);
@@ -44,11 +50,10 @@ class ConfigurationController extends Controller
 
         $business = Auth::user()->business()->first();
 
-        if (!isset($business)){
+        if (!isset($business)) {
             $merchant = Auth::user()->merchant()->first();
             $business = $merchant->Business()->first();
-        }
-        else{
+        } else {
             $merchant = $business->merchant()->get();
 
             if (count($merchant) !== 0) {
