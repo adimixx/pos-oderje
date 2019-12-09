@@ -54,9 +54,6 @@ class LoginController extends Controller
 
     public function showLoginForm(Request $request)
     {
-        ini_set( 'session.cookie_httponly', false);
-        ini_set("session.cookie_secure", false);
-
         $merchantCookie = $request->cookie('merchant');
         $businessCookie = $request->cookie('business');
         $machineOwner = null;
@@ -129,23 +126,20 @@ class LoginController extends Controller
 
         if ($credentials !== null && Auth::attempt($credentials)) {
             $uuid = $request->cookie('uuid');
-            $ip = request()->ip();
             $role = Auth::user()->getRoleNames()->toArray();
 
             if (isset($uuid))
             {
-                $device = device::where('uuid', $uuid)->Where('ip_address', $ip)->first();
+                $device = device::where('uuid', $uuid)->first();
             }
 
             if (!isset($uuid) || $device === null) {
                 $lifetime = time() + 60 * 60 * 24 * 365; // one year
-
                 $device = new device();
                 $uuid = (string)Uuid::generate();
                 Cookie::queue('uuid', $uuid, $lifetime);
 
                 $device->uuid = $uuid;
-                $device->ip_address = $ip;
                 $device->status = "INIT";
                 $device->save();
             }
@@ -158,9 +152,12 @@ class LoginController extends Controller
                 'log_out' => false
             ]);
 
-            if (array_search("Merchant Admin", $role) || array_search("Business Admin", $role)) {
+            if (array_search("Merchant Admin", $role) == 0|| array_search("Business Admin", $role) == 0) {
                 if ($device->machine_type == 1) {
                     return redirect()->route('cashier');
+                }
+                elseif (is_null($device->machine_type)){
+                    return redirect()->route('conf');
                 }
                 return redirect()->route('home');
             } else if (array_search("Super Admin", $role)) {

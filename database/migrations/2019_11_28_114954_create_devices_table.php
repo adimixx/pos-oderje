@@ -17,7 +17,6 @@ class CreateDevicesTable extends Migration
             $table->bigIncrements('id');
             $table->integer('business_id')->nullable();
             $table->integer('merchant_id')->nullable();
-            $table->string('ip_address');
             $table->string('uuid');
             $table->unsignedBigInteger('machine_type')->nullable();
             $table->string('name')->nullable();

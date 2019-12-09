@@ -8,6 +8,6 @@ class device extends Model
 {
     protected $table = "devices";
     protected $fillable = [
-        'business_id', 'merchant_id', 'ip_address','uuid','machine_type','name','status'
+        'business_id', 'merchant_id', 'uuid','machine_type','name','status'
     ];
 }

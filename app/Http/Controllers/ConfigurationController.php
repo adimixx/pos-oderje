@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\device;
 use App\Http\Requests\ConfigurationRequest;
 use App\machine_type;
+use App\user_log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -43,13 +44,10 @@ class ConfigurationController extends Controller
     public function IndexPOST(Request $request)
     {
         $uuid = $request->cookie('uuid');
-        $ip = request()->ip();
-        $device = device::where('uuid', $uuid)->orWhere('ip_address', $ip)->first();
-
+        $device = device::where('uuid', $uuid)->first();
         $lifetime = time() + 60 * 60 * 24 * 365;
 
         $business = Auth::user()->business()->first();
-
         if (!isset($business)) {
             $merchant = Auth::user()->merchant()->first();
             $business = $merchant->Business()->first();
