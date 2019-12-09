@@ -6,6 +6,7 @@ use App\ojdb_business;
 use App\ojdb_merchant;
 use App\User;
 use App\v2tpdev_pruser;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -77,15 +78,16 @@ class UserManagementController extends Controller
             $error['type_id'] = ['Invalid business id'];
         } elseif ($validatedRequest->type === 2 && is_null($pruser->Merchant()->find($validatedRequest->type_id))) {
             $error['type_id'] = ['Invalid merchant id'];
-        } else {
+        }
+        elseif(isset($validatedRequest->username) && !is_null(User::where('username',$validatedRequest->username)->first())){
+            $error['username'] = ['Username Already Exists'];
+        }
+
+        else {
             //Create new user
             if (!isset($validatedRequest->username)) {
-                do {
-                    $generateUsername = 'user' . $validatedRequest->type_id . mt_rand(1, 5);
-                    $res = User::where('username', $generateUsername)->first();
-                } while (isset($res));
-
-                $insertData['username'] = $generateUsername;
+                $generatedUsername = "user".$pruser->u_id.strtotime(Carbon::now());
+                $insertData['username'] = $generatedUsername;
             } else $insertData['username'] = $validatedRequest->username;
             $insertData['password'] = (!isset($validatedRequest->password)) ? Hash::make($insertData['username']) : Hash::make($validatedRequest->password);
             $insertData['created_by'] = $pruser->u_id;
