@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Cookie;
 
 class ConfigurationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+        $this->middleware(['permission:conf']);
+    }
+
     public function Index(Request $request)
     {
         $machineType = machine_type::all();
