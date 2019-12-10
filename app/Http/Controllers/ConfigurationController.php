@@ -38,7 +38,7 @@ class ConfigurationController extends Controller
 
             if (count($merchant) !== 0) $currentSetting['merchant'] = $merchant->find($merchantCookie);
         }
-        return view('conf', compact('machineType', 'business', 'merchant', 'currentSetting'));
+        return view('configuration', compact('machineType', 'business', 'merchant', 'currentSetting'));
     }
 
     public function IndexPOST(Request $request)
