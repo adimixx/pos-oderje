@@ -29,6 +29,8 @@ Vue.component('modal-payment', require('./components/CartPaymentModal.vue').defa
 
 Vue.component('item-list', require('./components/ItemList.vue').default);
 
+Vue.component('start-money', require('./components/StartMoney.vue').default);
+
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application

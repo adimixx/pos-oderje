@@ -18,7 +18,7 @@ class CreateCollectionsTable extends Migration
             $table->unsignedBigInteger('device_id');
             $table->unsignedBigInteger('user_id');
             $table->integer('bill_id');
-            $table->integer(' money_in');
+            $table->integer('money_in');
             $table->timestamps();
             $table->foreign('device_id')->references('id')->on('devices');
             $table->foreign('bill_id')->references('bill_id')->on('oj_db.bill');

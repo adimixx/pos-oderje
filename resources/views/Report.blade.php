@@ -13,12 +13,18 @@
                             <div class="col-12 text-center">
                                 <div class="row">
                                     <p class="text-primary col-2">Staff Name : </p>
-                                    <p class="text-dark col-4">{{$user->name}}</p>
-                                    <p class="text-primary col-2">Shift Start Time :</p>
+                                    <p class="text-dark col-3">{{$user->name}}</p>
+                                    <p class="text-primary col-3">Shift Start Time :</p>
                                     <p class="text-dark col-4">{{$onlineTime->created_at}}</p>
+                                    <div class="col-6">
+                                        <p class="text-primary">Total Collected : </p>
+                                        <p class="text-dark">RM {{number_format(($total), 2, '.', '')}}</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p class="text-primary">Cash left in register : </p>
+                                        <p class="text-dark">RM {{number_format(($totalCash), 2, '.', '')}}</p>
+                                    </div>
                                 </div>
-                                <p class="text-primary">Total Collected : </p>
-                                <p class="text-dark">RM {{number_format(($total), 2, '.', '')}}</p>
                             </div>
                         </div>
                     </div>
@@ -33,14 +39,18 @@
                             <thead class="thead-dark">
                             <tr>
                                 <th>Amount (RM)</th>
+                                <th>Cash in (RM)</th>
+                                <th>Cash out (RM)</th>
                                 <th>Time</th>
-                                <th>Type</th>
+                                <th>Payment Channel</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($collection as $col)
                                 <tr>
-                                    <td>{{number_format(($col->bill->transaction->amount/100), 2, '.', '')}}</td>
+                                    <td class="text-primary">{{number_format(($col->bill->transaction->amount/100), 2, '.', '')}}</td>
+                                    <td class="text-success">{{number_format(($col->money_in/100), 2, '.', '')}}</td>
+                                    <td class="text-danger">{{number_format((($col->money_in-$col->bill->transaction->amount)/100), 2, '.', '')}}</td>
                                     <td>{{substr($col->bill->bill_date, 11)}}</td>
                                     <td>{{$col->bill->transaction->type}}</td>
                                 </tr>

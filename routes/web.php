@@ -16,6 +16,8 @@
 Auth::routes();
 Route::get('/login', 'Auth\LoginController@showLoginForm')->name('showLoginForm');
 Route::post('/login', 'Auth\LoginController@login')->name('login');
+Route::get('/logout_verify', 'CashierController@logoutGet')->name('logoutGET');
+Route::post('/logout', 'Auth\LoginController@recordEndMoney')->name('logout');
 
 Route::get('/home', 'HomeController@index')->name('home');
 

@@ -20,6 +20,7 @@ class CreateUserLogsTable extends Migration
             $table->integer('start_money')->nullable();
             $table->integer('end_money')->nullable();
             $table->integer('calculated_end_money')->nullable();
+            $table->integer('difference')->nullable();
             $table->boolean('log_out');
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users');

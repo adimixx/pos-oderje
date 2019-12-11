@@ -96,7 +96,7 @@ class LoginController extends Controller
     {
         $credentials = null;
         $username = $request->username;
-        if (!is_null(User::role('Business Admin')->where('username', $username)->get()) || !is_null(User::role('Merchant Admin')->where('username', $username)->get()) || !is_null(User::role('Super Admin')->where('username', $username)->get())) {
+        if (count(User::role('Business Admin')->where('username', $username)->get()) != 0 || count(User::role('Merchant Admin')->where('username', $username)->get()) != 0|| count(User::role('Super Admin')->where('username', $username)->get()) != 0) {
             $credentials = [
                 'username' => $username,
                 'password' => $request->password,
@@ -117,7 +117,6 @@ class LoginController extends Controller
 
         $credentials = $this->loginBusinessMerchant($request);
         $credentials = (empty($credentials)) ? $this->loginInitMachine($request) : $credentials;
-
         if (empty($credentials)) {
             $this->incrementLoginAttempts($request);
             return $this->sendFailedLoginResponse($request);
@@ -167,15 +166,31 @@ class LoginController extends Controller
         return $this->sendFailedLoginResponse($request);
     }
 
-    public function logout(Request $request)
-    {
-        $lastLogin = user_log::where('user_id', \Illuminate\Support\Facades\Auth::user()->getAuthIdentifier())->orderBy('id', 'desc')->first();
-        if ($lastLogin !== null) $lastLogin->update(['log_out' => true]);
+    public function recordEndMoney (Request $request){
+        $validated = $request->validate(['start'=>'required|numeric']);
+
+
+        $user = Auth::user();
+        $userlog = $user->userlog()->where('log_out', false)->first();
+        $collection = $user->collection()->where('created_at', '>=', $userlog->created_at)->with('bill.transaction')->get();
+        $total = 0;
+
+        foreach ($collection as $col) {
+            $total += $col->bill->transaction->amount;
+        }
+
+        $totalCash = $total + $userlog->start_money;
+
+        $end = ((integer)$validated['start']);
+
+        $userlog->end_money = $end;
+        $userlog->calculated_end_money = $totalCash;
+        $userlog->difference = $end - $totalCash;
+        $userlog->log_out = true;
+        $userlog->save();
 
         $this->guard()->logout();
-
         $request->session()->invalidate();
-
         return $this->loggedOut($request) ?: redirect('/');
     }
 }

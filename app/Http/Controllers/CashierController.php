@@ -9,7 +9,9 @@ use App\ojdb_customer_order;
 use App\ojdb_merchant;
 use App\ojdb_product_business_merchant;
 use App\ojdb_transaction;
+use App\user_log;
 use App\users_merchant;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -66,7 +68,7 @@ class CashierController extends Controller
     public function recordStartMoney (Request $request){
         $validated = $request->validate(['start'=>'required|numeric']);
 
-        $start = ((double)$validated['start']) * 100;
+        $start = ((integer)$validated['start']);
 
         $userlog = Auth::user()->userlog()->where('log_out','false')->first();
         $userlog->start_money = $start;
@@ -114,6 +116,19 @@ class CashierController extends Controller
         $collection->save();
 
         return array("status" => "ok");
+    }
+
+    public function logoutGet (){
+        $user = Auth::user();
+        $onlineTime = $user->userlog()->where('log_out', false)->first();
+        $collection = $user->collection()->where('created_at', '>=', $onlineTime->created_at)->with('bill.transaction')->get();
+        $total = 0;
+        foreach ($collection as $col) {
+            $total += $col->bill->transaction->amount;
+        }
+        $totalCash = ($total + $onlineTime->start_money) /100;
+        $total = $total / 100;
+        return view('CashierPanel_EndMoney', compact('total', 'totalCash'));
     }
 
 }
