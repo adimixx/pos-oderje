@@ -48,9 +48,9 @@
                             <tbody>
                             @foreach($collection as $col)
                                 <tr>
-                                    <td class="text-primary">{{number_format(($col->bill->transaction->amount/100), 2, '.', '')}}</td>
+                                    <td class="text-primary">{{number_format((($col->bill->transaction->amount + $col->bill->transaction->tax) /100), 2, '.', '')}}</td>
                                     <td class="text-success">{{number_format(($col->money_in/100), 2, '.', '')}}</td>
-                                    <td class="text-danger">{{number_format((($col->money_in-$col->bill->transaction->amount)/100), 2, '.', '')}}</td>
+                                    <td class="text-danger">{{number_format((($col->money_in-($col->bill->transaction->amount + $col->bill->transaction->tax) )/100), 2, '.', '')}}</td>
                                     <td>{{substr($col->bill->bill_date, 11)}}</td>
                                     <td>{{$col->bill->transaction->type}}</td>
                                 </tr>

@@ -18,7 +18,7 @@ class ReportController extends Controller
         $collection = $user->collection()->where('created_at', '>=', $onlineTime->created_at)->with('bill.transaction')->get();
         $total = 0;
         foreach ($collection as $col) {
-            $total += $col->bill->transaction->amount;
+            $total += ($col->bill->transaction->amount + $col->bill->transaction->tax);
         }
         $totalCash = ($total + $onlineTime->start_money) /100;
         $total = $total / 100;

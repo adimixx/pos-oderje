@@ -19,7 +19,7 @@
             </div>
         </div>
         <div class="col-lg-8 col-md-9 my-auto">
-            <form method="POST" action="{{ route('logout') }}">
+            <form id="logout-form" action="{{ route('logout') }}" method="POST">
                 @csrf
                 <div class="form-group text-center">
                     <label for="start" class="mb-4 h5 text-primary">Total Cash inside counter</label>
@@ -36,18 +36,12 @@
                                                      document.getElementById('logout-form').submit();">
                             <span class="text-light">{{ __('Save and Logout') }}</span>
                         </a>
-
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST"
-                              style="display: none;">
-                            @csrf
-                        </form>
                     </div>
-
                     <a href="{{route('home')}}" class="btn btn-lg btn-danger btn-user btn-block p-4 mt-4">
                         <span class="text-light">{{ __('Cancel') }}</span>
                     </a>
                 </div>
+            </form>
         </div>
-        </form>
     </div>
 @endsection

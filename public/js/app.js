@@ -1881,7 +1881,6 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
-    console.log('cartList mounted');
     this.$root.$on('AddItem', function (dat) {
       _this.onAddNewItem(dat);
     });
@@ -1896,23 +1895,31 @@ __webpack_require__.r(__webpack_exports__);
     onAddNewItem: function onAddNewItem(item) {
       var exist = false;
 
-      for (var i = 0; i < this.cartItems.length; i++) {
-        if (this.cartItems[i].item === item) {
-          var existCart = this.cartItems[i];
-          existCart.quantity++;
-          existCart.total = Number(existCart.quantity * existCart.item.product.price).toFixed(2);
-          exist = true;
-          break;
-        }
-      }
-
-      if (!exist) {
+      if (item.type.toUpperCase() == "MANUAL") {
         this.cartItems.push({
           item: item,
-          quantity: 1,
+          quantity: item.quantity,
           total: Number(item.product.price * 1).toFixed(2)
         });
         console.log(item);
+      } else if (item.type.toUpperCase() == "PRODUCT") {
+        for (var i = 0; i < this.cartItems.length; i++) {
+          if (this.cartItems[i].item === item) {
+            var existCart = this.cartItems[i];
+            existCart.quantity++;
+            existCart.total = Number(existCart.quantity * existCart.item.product.price).toFixed(2);
+            exist = true;
+            break;
+          }
+        }
+
+        if (!exist) {
+          this.cartItems.push({
+            item: item,
+            quantity: 1,
+            total: Number(item.product.price * 1).toFixed(2)
+          });
+        }
       }
 
       this.$root.$emit('ItemChanged', this.cartItems);
@@ -2236,6 +2243,116 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CashRegisterCalculator.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CashRegisterCalculator.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      number: ["7", "8", "9", "4", "5", "6", "1", "2", "3", "0"],
+      operation: ["ADD", "QTY"],
+      priceInsertedArray: [],
+      quantityInsertedArray: [],
+      priceCalculated: 0,
+      quantity: 1,
+      isQuantity: false,
+      calculatorDisplay: "0.00",
+      item: ""
+    };
+  },
+  mounted: function mounted() {},
+  methods: {
+    onTap: function onTap(input) {
+      if ((input.toUpperCase() == "ADD" || input.toUpperCase() == "QTY") && this.priceCalculated == 0) {
+        alert("Please Insert an amount");
+        return;
+      } else if (input.toUpperCase() == "ADD") {
+        this.item = {
+          product: {
+            img: "default.jpeg",
+            price: this.priceCalculated
+          },
+          quantity: this.quantity,
+          type: "MANUAL"
+        };
+        this.$root.$emit('AddItem', this.item);
+        this.onReset();
+      } else if (input.toUpperCase() == "QTY" && this.isQuantity == false) {
+        this.isQuantity = true;
+      } else if (this.isQuantity) {
+        this.quantityInsertedArray.push(input);
+        this.quantity = Number(this.quantityInsertedArray.join(""));
+      } else {
+        this.priceInsertedArray.push(input);
+      }
+
+      this.calculate();
+    },
+    calculate: function calculate() {
+      this.priceCalculated = Number(this.priceInsertedArray.join("")) / 100;
+      this.calculatorDisplay = Number(this.priceCalculated).toFixed(2);
+
+      if (this.isQuantity) {
+        this.calculatorDisplay += " x ";
+      }
+
+      if (this.quantity > 1) {
+        this.calculatorDisplay += this.quantity;
+      }
+    },
+    onReset: function onReset() {
+      this.priceInsertedArray = [];
+      this.quantityInsertedArray = [];
+      this.priceCalculated = 0;
+      this.calculatorDisplay = "0.00";
+      this.quantity = 1;
+      this.isQuantity = false;
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ItemList.vue?vue&type=script&lang=js&":
 /*!*******************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ItemList.vue?vue&type=script&lang=js& ***!
@@ -2272,6 +2389,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     onClickItem: function onClickItem(item) {
+      item.type = "PRODUCT";
       this.$root.$emit('AddItem', item);
     }
   }
@@ -66989,7 +67107,7 @@ var render = function() {
                     _vm._v(
                       _vm._s(_vm.priceUnit) +
                         " " +
-                        _vm._s(cart.item.product.price)
+                        _vm._s(Number(cart.item.product.price).toFixed(2))
                     )
                   ])
                 ])
@@ -67053,10 +67171,12 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "text-center py-4 my-0 mx-2", attrs: { id: "newOrder" } },
+    { staticClass: "text-center w-100 py-4", attrs: { id: "newOrder" } },
     [
       _c("div", { staticClass: "py-2", on: { click: _vm.onClickNew } }, [
-        _c("p", { staticClass: "font-weight-bold m-0" }, [_vm._v("Reset Cart")])
+        _c("p", { staticClass: "font-weight-bold m-0 text-white" }, [
+          _vm._v("Reset Cart")
+        ])
       ])
     ]
   )
@@ -67407,6 +67527,126 @@ var render = function() {
   ])
 }
 var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CashRegisterCalculator.vue?vue&type=template&id=72d7d2c3&":
+/*!*************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/CashRegisterCalculator.vue?vue&type=template&id=72d7d2c3& ***!
+  \*************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "w-100 h-100" }, [
+    _c("div", { staticClass: "m-5 py-4 bg-dark text-right" }, [
+      _c("p", { staticClass: "text-light h3 m-3" }, [
+        _vm._v(_vm._s(_vm.calculatorDisplay))
+      ])
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "d-flex flex-row m-5" }, [
+      _c(
+        "div",
+        { staticClass: "row justify-content-center flex-grow-1 ml-0 mr-2" },
+        [
+          _vm._l(_vm.number, function(num) {
+            return _c(
+              "div",
+              {
+                staticClass: "pl-0 pr-1 pb-1",
+                class: num === "0" ? "col-8" : "col-4",
+                on: {
+                  click: function($event) {
+                    return _vm.onTap(num)
+                  }
+                }
+              },
+              [
+                _c(
+                  "div",
+                  {
+                    staticClass:
+                      "bg-dark text-center moneyNumber py-3 h3 m-0 border border-primary rounded m-1"
+                  },
+                  [
+                    _c("span", { staticClass: "text-light my-3" }, [
+                      _vm._v(_vm._s(num))
+                    ])
+                  ]
+                )
+              ]
+            )
+          }),
+          _vm._v(" "),
+          _c(
+            "div",
+            {
+              staticClass: "pl-0 pr-1 pb-1 col-4",
+              on: {
+                click: function($event) {
+                  return _vm.onReset()
+                }
+              }
+            },
+            [_vm._m(0)]
+          )
+        ],
+        2
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "justify-content-center d-flex flex-column w-25" },
+        _vm._l(_vm.operation, function(op) {
+          return _c(
+            "div",
+            {
+              staticClass:
+                "flex-grow-1 bg-primary text-center moneyNumber py-5 h3 m-0 border border-primary rounded m-1",
+              on: {
+                click: function($event) {
+                  return _vm.onTap(op)
+                }
+              }
+            },
+            [
+              _c("p", { staticClass: "text-light h3 my-3" }, [
+                _vm._v(_vm._s(op))
+              ])
+            ]
+          )
+        }),
+        0
+      )
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      {
+        staticClass:
+          "bg-danger text-center moneyNumber py-3 h5 m-0 border border-dark rounded m-1"
+      },
+      [_c("span", { staticClass: "text-light my-3" }, [_vm._v("RESET")])]
+    )
+  }
+]
 render._withStripped = true
 
 
@@ -79741,6 +79981,7 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('cart-list', __webpack_requ
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('cart-total', __webpack_require__(/*! ./components/CartTotal.vue */ "./resources/js/components/CartTotal.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('cart-reset', __webpack_require__(/*! ./components/CartNew.vue */ "./resources/js/components/CartNew.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('modal-payment', __webpack_require__(/*! ./components/CartPaymentModal.vue */ "./resources/js/components/CartPaymentModal.vue")["default"]);
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('cash-register', __webpack_require__(/*! ./components/CashRegisterCalculator.vue */ "./resources/js/components/CashRegisterCalculator.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('item-list', __webpack_require__(/*! ./components/ItemList.vue */ "./resources/js/components/ItemList.vue")["default"]);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('start-money', __webpack_require__(/*! ./components/StartMoney.vue */ "./resources/js/components/StartMoney.vue")["default"]);
 /**
@@ -79752,7 +79993,23 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.component('start-money', __webpack_re
 var app = new vue__WEBPACK_IMPORTED_MODULE_0___default.a({
   el: '#app',
   data: {
-    showPayment: false
+    showPayment: false,
+    panelProduct: true,
+    panelCalc: false
+  },
+  methods: {
+    changeURL: function changeURL(url) {
+      window.location = url;
+    },
+    changePosPanel: function changePosPanel(panelid) {
+      if (panelid == 1) {
+        this.panelProduct = true;
+        this.panelCalc = false;
+      } else if (panelid == 2) {
+        this.panelProduct = false;
+        this.panelCalc = true;
+      }
+    }
   }
 });
 
@@ -80074,6 +80331,76 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CartTotal_vue_vue_type_template_id_ae4327ae___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CartTotal_vue_vue_type_template_id_ae4327ae___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/CashRegisterCalculator.vue":
+/*!************************************************************!*\
+  !*** ./resources/js/components/CashRegisterCalculator.vue ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _CashRegisterCalculator_vue_vue_type_template_id_72d7d2c3___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./CashRegisterCalculator.vue?vue&type=template&id=72d7d2c3& */ "./resources/js/components/CashRegisterCalculator.vue?vue&type=template&id=72d7d2c3&");
+/* harmony import */ var _CashRegisterCalculator_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./CashRegisterCalculator.vue?vue&type=script&lang=js& */ "./resources/js/components/CashRegisterCalculator.vue?vue&type=script&lang=js&");
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _CashRegisterCalculator_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _CashRegisterCalculator_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _CashRegisterCalculator_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _CashRegisterCalculator_vue_vue_type_template_id_72d7d2c3___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _CashRegisterCalculator_vue_vue_type_template_id_72d7d2c3___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/CashRegisterCalculator.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/CashRegisterCalculator.vue?vue&type=script&lang=js&":
+/*!*************************************************************************************!*\
+  !*** ./resources/js/components/CashRegisterCalculator.vue?vue&type=script&lang=js& ***!
+  \*************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CashRegisterCalculator_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./CashRegisterCalculator.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CashRegisterCalculator.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_CashRegisterCalculator_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/CashRegisterCalculator.vue?vue&type=template&id=72d7d2c3&":
+/*!*******************************************************************************************!*\
+  !*** ./resources/js/components/CashRegisterCalculator.vue?vue&type=template&id=72d7d2c3& ***!
+  \*******************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CashRegisterCalculator_vue_vue_type_template_id_72d7d2c3___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./CashRegisterCalculator.vue?vue&type=template&id=72d7d2c3& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/CashRegisterCalculator.vue?vue&type=template&id=72d7d2c3&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CashRegisterCalculator_vue_vue_type_template_id_72d7d2c3___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_CashRegisterCalculator_vue_vue_type_template_id_72d7d2c3___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

@@ -8,16 +8,10 @@ use App\ojdb_business;
 use App\ojdb_merchant;
 use App\User;
 use App\user_log;
-use App\v2tpdev_flc_user_group_mapping;
-use App\v2tpdev_pruser;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\Hash;
-use phpDocumentor\Reflection\Element;
 use Webpatser\Uuid\Uuid;
 
 class LoginController extends Controller
@@ -35,18 +29,8 @@ class LoginController extends Controller
 
     use AuthenticatesUsers;
 
-    /**
-     * Where to redirect users after login.
-     *
-     * @var string
-     */
     protected $redirectTo = '/home';
 
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('guest')->except('logout');
@@ -104,7 +88,6 @@ class LoginController extends Controller
         }
         return $credentials;
     }
-
 
     public function login(Request $request)
     {
@@ -166,31 +149,42 @@ class LoginController extends Controller
         return $this->sendFailedLoginResponse($request);
     }
 
-    public function recordEndMoney (Request $request){
-        $validated = $request->validate(['start'=>'required|numeric']);
-
-
+    public function logout (Request $request){
         $user = Auth::user();
         $userlog = $user->userlog()->where('log_out', false)->first();
-        $collection = $user->collection()->where('created_at', '>=', $userlog->created_at)->with('bill.transaction')->get();
-        $total = 0;
 
-        foreach ($collection as $col) {
-            $total += $col->bill->transaction->amount;
+        if (!is_null($userlog->start_money)){
+            $collection = $user->collection()->where('created_at', '>=', $userlog->created_at)->with('bill.transaction')->get();
+            $total = 0;
+
+            foreach ($collection as $col) {
+                $total += ($col->bill->transaction->amount + $col->bill->transaction->tax);
+            }
+
+            $totalCash = $total + $userlog->start_money;
+            if (is_null($userlog->end_money) && !isset($request->start)){
+                $totalCash = $totalCash/100;
+                $total = $total/100;
+
+                return view('CashierPanel_EndMoney', compact('total', 'totalCash'));
+            }
+
+            else{
+                $validated = $request->validate(['start'=>'required|numeric']);
+                $end = ((integer)$validated['start']);
+
+                $userlog->end_money = $end;
+                $userlog->calculated_end_money = $totalCash;
+                $userlog->difference = $end - $totalCash;
+                $userlog->log_out = true;
+                $userlog->save();
+            }
         }
-
-        $totalCash = $total + $userlog->start_money;
-
-        $end = ((integer)$validated['start']);
-
-        $userlog->end_money = $end;
-        $userlog->calculated_end_money = $totalCash;
-        $userlog->difference = $end - $totalCash;
-        $userlog->log_out = true;
-        $userlog->save();
 
         $this->guard()->logout();
         $request->session()->invalidate();
         return $this->loggedOut($request) ?: redirect('/');
     }
+
+
 }

@@ -3,7 +3,7 @@
         <tbody>
         <tr v-for="cart in cartItems">
             <td class="text-left" v-on:click="onAddItem(cart)">
-                <i class="fas fa-plus fa-2x text-info pt-3" ></i>
+                <i class="fas fa-plus fa-2x text-info pt-3"></i>
             </td>
             <td class="w-75">
                 <div class="row">
@@ -11,7 +11,7 @@
                          v-bind:src="'https://app.oderje.com/images/product/'+(cart.item.product.img ? cart.item.product.img :'default.jpeg')">
                     <div class="col-md-8">
                         <p class="font-weight-bolder">{{cart.item.product.name}}</p>
-                        <p class="text-primary">{{priceUnit}} {{cart.item.product.price}}</p>
+                        <p class="text-primary">{{priceUnit}} {{Number(cart.item.product.price).toFixed(2)}}</p>
                     </div>
                 </div>
             </td>
@@ -23,7 +23,7 @@
                     <p class="font-weight-bold text-success">{{priceUnit}} {{cart.total}}</p>
                 </div>
             </td>
-            <td class="text-right"  v-on:click="onRemoveItem(cart)">
+            <td class="text-right" v-on:click="onRemoveItem(cart)">
                 <i class="fas fa-minus fa-2x text-danger pt-3"></i>
             </td>
         </tr>
@@ -40,7 +40,6 @@
             }
         },
         mounted() {
-            console.log('cartList mounted');
             this.$root.$on('AddItem', (dat) => {
                 this.onAddNewItem(dat);
             });
@@ -54,20 +53,29 @@
         , methods: {
             onAddNewItem: function (item) {
                 var exist = false;
-
-                for (var i = 0; i < this.cartItems.length; i++) {
-                    if (this.cartItems[i].item === item) {
-                        var existCart = this.cartItems[i];
-                        existCart.quantity++;
-                        existCart.total = Number(existCart.quantity * existCart.item.product.price).toFixed(2);
-
-                        exist = true;
-                        break;
-                    }
-                }
-                if (!exist) {
-                    this.cartItems.push({item: item, quantity: 1, total: Number(item.product.price * 1).toFixed(2)});
+                if (item.type.toUpperCase() == "MANUAL") {
+                    this.cartItems.push({
+                        item: item,
+                        quantity: item.quantity,
+                        total: Number(item.product.price * 1).toFixed(2)
+                    });
                     console.log(item);
+                }
+
+                else if (item.type.toUpperCase() == "PRODUCT"){
+                    for (var i = 0; i < this.cartItems.length; i++) {
+                        if (this.cartItems[i].item === item) {
+                            var existCart = this.cartItems[i];
+                            existCart.quantity++;
+                            existCart.total = Number(existCart.quantity * existCart.item.product.price).toFixed(2);
+
+                            exist = true;
+                            break;
+                        }
+                    }
+                    if (!exist) {
+                        this.cartItems.push({item: item, quantity: 1, total: Number(item.product.price * 1).toFixed(2)});
+                    }
                 }
 
                 this.$root.$emit('ItemChanged', this.cartItems);

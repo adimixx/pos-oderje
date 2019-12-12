@@ -11,7 +11,7 @@ class ojdb_transaction extends Model
     public $timestamps = false;
 
     protected $fillable = [
-      "type","vt_id","sender","receiver","amount","status","bill_id","type_acc","voucher_id"
+      "type","vt_id","sender","receiver","amount","tax","status","bill_id","type_acc","voucher_id"
     ];
 
     public function bill(){

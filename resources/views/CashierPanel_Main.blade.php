@@ -12,34 +12,59 @@
         </template>
     </b-modal>
 
-    <div class="row mx-0 h-100" id="test">
-        <div class="col-7 px-0 d-flex flex-column h-100">
-            <div class="row m-1">
-                <div class="col-1 p-0">
-                    <a href="{{route('home')}}">
-                        <div class="text-center py-4 mb-2 mt-0 bg-light">
-                            <p class="font-weight-bold m-0 text-dark">Menu</p>
-                        </div>
-                    </a>
-                </div>
-                <div class="col p-0">
-                    <cart-reset></cart-reset>
-                </div>
+    <div class="row mx-0 h-100" id="cashierSide">
+        <div class="col-1 py-5 px-0 d-flex align-items-start flex-column text-center bg-dark">
+            <div class="w-100 py-3 border border-light border-left-0 border-right-0" @click="changeURL('{{route('home')}}')">
+                <span class="text-primary">
+                    <i class="fas fa-3x fa-bars"></i>
+                </span>
+                <h6 class="text-light"><small>Main Menu</small></h6>
             </div>
-            <div>
+
+            <div class="w-100 py-3 border border-light border-left-0 border-right-0" @click="changePosPanel(1)">
+                <span class="text-primary">
+                <i class="fas fa-3x fa-cubes"></i>
+                </span>
+                <h6 class="text-light"><small>Product</small></h6>
+            </div>
+            <div class="w-100 py-3 border border-light border-left-0 border-right-0" @click="changePosPanel(2)">
+                <span class="text-primary">
+                <i class="fas fa-3x fa-calculator"></i>
+                </span>
+                <h6 class="text-light"><small>Manual</small></h6>
+            </div>
+
+            <div class="w-100 mt-auto py-3 border border-danger border-left-0 border-right-0 bg-danger" onclick="document.getElementById('logout-form').submit();">
+                <span class="text-light">
+                <i class="fas fa-3x fa-sign-out-alt"></i>
+                </span>
+                <h6 class="text-light"><small>Sign Out</small></h6>
+
+                <form id="logout-form" action="{{ route('logout') }}" method="POST"
+                      style="display: none;">
+                    @csrf
+                </form>
+            </div>
+        </div>
+
+        <div class="col-6 p-0 d-flex align-items-start flex-column">
+                <cart-reset></cart-reset>
+            <div class="text-center w-100 p-0">
                 <input class="form-control" placeholder="Search">
             </div>
-            <div class="card my-1 flex-grow-1 overflow-auto">
+            <div class="card my-0 flex-grow-1 overflow-auto w-100">
                 <div class="card-body">
-                    <item-list></item-list>
+                    <item-list v-show="panelProduct"></item-list>
+                    <cash-register v-show="panelCalc"></cash-register>
                 </div>
             </div>
         </div>
-        <div class="col-5 pl-2 pr-0 h-100 d-flex flex-column">
+
+        <div class="col-5 p-0 d-flex flex-column">
             <div class="flex-grow-1 overflow-hidden">
                 <div class="full d-flex flex-column h-100">
-                    <div class="card-header">
-                        Cart
+                    <div class="card-header text-center py-4">
+                        <span class="py-2"><p class="h4">Cart</p></span>
                     </div>
                     <div class="d-flex flex-row bg-dark text-light">
                         <p class="flex-grow-1 w-75 m-0 p-2 text-left font-weight-bold">Item</p>

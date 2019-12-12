@@ -21,11 +21,13 @@ Vue.use(BootstrapVue);
 
 // const files = require.context('./', true, /\.vue$/i)
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default))
-
 Vue.component('cart-list', require('./components/CartList.vue').default);
 Vue.component('cart-total', require('./components/CartTotal.vue').default);
 Vue.component('cart-reset', require('./components/CartNew.vue').default);
 Vue.component('modal-payment', require('./components/CartPaymentModal.vue').default);
+
+Vue.component('cash-register', require('./components/CashRegisterCalculator.vue').default);
+
 
 Vue.component('item-list', require('./components/ItemList.vue').default);
 
@@ -40,8 +42,26 @@ Vue.component('start-money', require('./components/StartMoney.vue').default);
 const app = new Vue({
     el: '#app',
     data: {
-        showPayment: false
+        showPayment: false,
+        panelProduct: true,
+        panelCalc:false
+    },
+    methods: {
+        changeURL: function (url) {
+            window.location = url;
+        },
+        changePosPanel: function (panelid) {
+            if (panelid == 1){
+                this.panelProduct= true;
+                this.panelCalc = false;
+            }
+            else  if (panelid == 2){
+                this.panelProduct= false;
+                this.panelCalc = true;
+            }
+        }
     }
 });
+
 
 

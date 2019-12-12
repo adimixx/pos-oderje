@@ -35,10 +35,16 @@
                             <h4 class="text-primary m-0">{{ Auth::user()->name }}</h4>
                         </div>
                         <div class="col">
-                            <a class="btn btn-danger btn-lg" href="{{ route('logoutGET') }}">
-                                {{ __('Logout') }}
+                            <a class="btn btn-lg btn-danger btn-user btn-block" href="{{ route('logout') }}"
+                               onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
+                                <span class="text-light">{{ __('Logout') }}</span>
                             </a>
 
+                            <form id="logout-form" action="{{ route('logout') }}" method="POST"
+                                  style="display: none;">
+                                @csrf
+                            </form>
                         </div>
                     </div>
                 </div>

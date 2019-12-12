@@ -27,6 +27,7 @@
         }
         , methods: {
             onClickItem: function (item) {
+                item.type = "PRODUCT";
                 this.$root.$emit('AddItem', item);
             }
         }

@@ -9,16 +9,13 @@ use App\ojdb_customer_order;
 use App\ojdb_merchant;
 use App\ojdb_product_business_merchant;
 use App\ojdb_transaction;
-use App\user_log;
 use App\users_merchant;
-use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class CashierController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware(['permission:pos']);
@@ -79,7 +76,7 @@ class CashierController extends Controller
 
     public function transactionRecord(Request $request)
     {
-        $taxSetting = 1.06;
+        $taxSetting = 0.06;
         $order = $request->order;
         $moneyin = ((double)$request->moneyin) * 100;
         $data = array();
@@ -89,21 +86,26 @@ class CashierController extends Controller
 
         foreach ($order as $ord) {
             if (isset($ord['item']['id'])) {
-                $product = ojdb_product_business_merchant::find($ord['item']['id'])->product;
+                $pbm = ojdb_product_business_merchant::find($ord['item']['id']);
+                $pbm->quantity -= $ord['quantity'];
+                $product = $pbm->product;
                 $data[] = [
                     'pbm_id' => $ord['item']['id'],
                     'quantity' => $ord['quantity'],
                     'bill_id' => $bill->bill_id
                 ];
+                $pbm->save();
             }
             $total += ($product->p_price * $ord['quantity']);
         }
 
-        $total = $total * $taxSetting;
+        $tax = ($total * $taxSetting) * 100;
+        $total = $total * 100;
 
         $transaction = new ojdb_transaction();
         $transaction->type = "CASH";
-        $transaction->amount = $total * 100;
+        $transaction->amount = $total;
+        $transaction->tax = $tax;
         $transaction->status = "success";
         $transaction->bill_id = $bill->bill_id;
         $transaction->save();
@@ -117,18 +119,4 @@ class CashierController extends Controller
 
         return array("status" => "ok");
     }
-
-    public function logoutGet (){
-        $user = Auth::user();
-        $onlineTime = $user->userlog()->where('log_out', false)->first();
-        $collection = $user->collection()->where('created_at', '>=', $onlineTime->created_at)->with('bill.transaction')->get();
-        $total = 0;
-        foreach ($collection as $col) {
-            $total += $col->bill->transaction->amount;
-        }
-        $totalCash = ($total + $onlineTime->start_money) /100;
-        $total = $total / 100;
-        return view('CashierPanel_EndMoney', compact('total', 'totalCash'));
-    }
-
 }
