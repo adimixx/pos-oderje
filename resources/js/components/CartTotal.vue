@@ -31,7 +31,6 @@
             }
         },
         mounted() {
-            console.log('cartTotal mounted');
             this.$root.$on('ItemChanged', (items) => {
                 this.ItemChanged(items);
             });

@@ -1871,11 +1871,23 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       cartItems: [],
-      priceUnit: 'RM'
+      priceUnit: 'RM',
+      manualItem: 1
     };
   },
   mounted: function mounted() {
@@ -1896,12 +1908,13 @@ __webpack_require__.r(__webpack_exports__);
       var exist = false;
 
       if (item.type.toUpperCase() == "MANUAL") {
+        item.product.name = "Item #" + this.manualItem;
         this.cartItems.push({
           item: item,
           quantity: item.quantity,
           total: Number(item.product.price * 1).toFixed(2)
         });
-        console.log(item);
+        this.manualItem++;
       } else if (item.type.toUpperCase() == "PRODUCT") {
         for (var i = 0; i < this.cartItems.length; i++) {
           if (this.cartItems[i].item === item) {
@@ -1942,6 +1955,7 @@ __webpack_require__.r(__webpack_exports__);
           existCart.quantity--;
 
           if (existCart.quantity === 0) {
+            if (existCart.item.type.toUpperCase() == "MANUAL") this.manualItem--;
             this.cartItems.splice(i, 1);
           } else {
             existCart.total = Number(existCart.quantity * existCart.item.product.price).toFixed(2);
@@ -2134,6 +2148,7 @@ __webpack_require__.r(__webpack_exports__);
     moneyPress: function moneyPress(item) {
       if (item === true) {
         this.UnpaidBalance = this.inputCashNumeric - Number(this.totalPrice);
+        console.dir(this.cartList);
 
         if (this.UnpaidBalance < 0) {
           this.UnpaidBalance = Number(this.UnpaidBalance * -1).toFixed(2);
@@ -2214,7 +2229,6 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
-    console.log('cartTotal mounted');
     this.$root.$on('ItemChanged', function (items) {
       _this.ItemChanged(items);
     });
@@ -2334,9 +2348,6 @@ __webpack_require__.r(__webpack_exports__);
 
       if (this.isQuantity) {
         this.calculatorDisplay += " x ";
-      }
-
-      if (this.quantity > 1) {
         this.calculatorDisplay += this.quantity;
       }
     },
@@ -2375,22 +2386,56 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
+      getItems: [],
       items: []
     };
   },
   mounted: function mounted() {
+    var _this = this;
+
+    this.$root.$on('SearchItem', function (items) {
+      _this.searchItem(items);
+    });
     axios.get('/cashier/list').then(function (response) {
-      this.items = response.data;
+      this.getItems = response.data;
+      this.items = this.getItems;
     }.bind(this), 'json');
   },
   methods: {
     onClickItem: function onClickItem(item) {
       item.type = "PRODUCT";
       this.$root.$emit('AddItem', item);
+    },
+    searchItem: function searchItem(query) {
+      if (query == "") {
+        this.items = this.getItems;
+      } else {
+        this.items = [];
+        var regex = RegExp(query, 'gi');
+
+        for (var i = 0; i < this.getItems.length; i++) {
+          if (regex.test(this.getItems[i].product.name)) {
+            this.items.push(this.getItems[i]);
+          }
+        }
+      }
     }
   }
 });
@@ -67063,91 +67108,126 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "table",
-    { staticClass: "table table-responsive table-hover h-100 m-0" },
-    [
-      _c(
-        "tbody",
-        _vm._l(_vm.cartItems, function(cart) {
-          return _c("tr", [
+  return _c("div", { staticClass: "card-body p-0" }, [
+    _vm.cartItems.length == 0
+      ? _c("div", { staticClass: "h-100 notFound" }, [_vm._m(0)])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.cartItems.length != 0
+      ? _c(
+          "table",
+          { staticClass: "table table-responsive table-hover h-100 m-0" },
+          [
             _c(
-              "td",
-              {
-                staticClass: "text-left",
-                on: {
-                  click: function($event) {
-                    return _vm.onAddItem(cart)
-                  }
-                }
-              },
-              [_c("i", { staticClass: "fas fa-plus fa-2x text-info pt-3" })]
-            ),
-            _vm._v(" "),
-            _c("td", { staticClass: "w-75" }, [
-              _c("div", { staticClass: "row" }, [
-                _c("img", {
-                  staticClass: "col-md-4 img-fluid",
-                  staticStyle: { height: "90px" },
-                  attrs: {
-                    src:
-                      "https://app.oderje.com/images/product/" +
-                      (cart.item.product.img
-                        ? cart.item.product.img
-                        : "default.jpeg")
-                  }
-                }),
-                _vm._v(" "),
-                _c("div", { staticClass: "col-md-8" }, [
-                  _c("p", { staticClass: "font-weight-bolder" }, [
-                    _vm._v(_vm._s(cart.item.product.name))
+              "tbody",
+              _vm._l(_vm.cartItems, function(cart) {
+                return _c("tr", [
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-left",
+                      on: {
+                        click: function($event) {
+                          return _vm.onAddItem(cart)
+                        }
+                      }
+                    },
+                    [
+                      _c("i", {
+                        staticClass: "fas fa-plus fa-2x text-info pt-3"
+                      })
+                    ]
+                  ),
+                  _vm._v(" "),
+                  _c("td", { staticClass: "w-75" }, [
+                    _c("div", { staticClass: "row" }, [
+                      _c("img", {
+                        staticClass: "col-md-4 img-fluid",
+                        staticStyle: { height: "90px" },
+                        attrs: {
+                          src:
+                            "https://app.oderje.com/images/product/" +
+                            (cart.item.product.img
+                              ? cart.item.product.img
+                              : "default.jpeg")
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col-md-8" }, [
+                        _c("p", { staticClass: "font-weight-bolder" }, [
+                          _vm._v(_vm._s(cart.item.product.name))
+                        ]),
+                        _vm._v(" "),
+                        _c("p", { staticClass: "text-primary" }, [
+                          _vm._v(
+                            _vm._s(_vm.priceUnit) +
+                              " " +
+                              _vm._s(Number(cart.item.product.price).toFixed(2))
+                          )
+                        ])
+                      ])
+                    ])
                   ]),
                   _vm._v(" "),
-                  _c("p", { staticClass: "text-primary" }, [
-                    _vm._v(
-                      _vm._s(_vm.priceUnit) +
-                        " " +
-                        _vm._s(Number(cart.item.product.price).toFixed(2))
-                    )
-                  ])
+                  _c("td", { staticClass: "text-center w-25" }, [
+                    _c("div", { staticClass: "p-1" }, [
+                      _c("p", { staticClass: "font-weight-bolder" }, [
+                        _vm._v(_vm._s(cart.quantity))
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "p-1" }, [
+                      _c(
+                        "p",
+                        { staticClass: "font-weight-bold text-success" },
+                        [
+                          _vm._v(
+                            _vm._s(_vm.priceUnit) + " " + _vm._s(cart.total)
+                          )
+                        ]
+                      )
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "td",
+                    {
+                      staticClass: "text-right",
+                      on: {
+                        click: function($event) {
+                          return _vm.onRemoveItem(cart)
+                        }
+                      }
+                    },
+                    [
+                      _c("i", {
+                        staticClass: "fas fa-minus fa-2x text-danger pt-3"
+                      })
+                    ]
+                  )
                 ])
-              ])
-            ]),
-            _vm._v(" "),
-            _c("td", { staticClass: "text-center w-25" }, [
-              _c("div", { staticClass: "p-1" }, [
-                _c("p", { staticClass: "font-weight-bolder" }, [
-                  _vm._v(_vm._s(cart.quantity))
-                ])
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "p-1" }, [
-                _c("p", { staticClass: "font-weight-bold text-success" }, [
-                  _vm._v(_vm._s(_vm.priceUnit) + " " + _vm._s(cart.total))
-                ])
-              ])
-            ]),
-            _vm._v(" "),
-            _c(
-              "td",
-              {
-                staticClass: "text-right",
-                on: {
-                  click: function($event) {
-                    return _vm.onRemoveItem(cart)
-                  }
-                }
-              },
-              [_c("i", { staticClass: "fas fa-minus fa-2x text-danger pt-3" })]
+              }),
+              0
             )
-          ])
-        }),
-        0
-      )
-    ]
-  )
+          ]
+        )
+      : _vm._e()
+  ])
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "my-auto text-center py-5" }, [
+      _c("span", { staticClass: "text-muted" }, [
+        _c("i", { staticClass: "fas fa-10x fa-shopping-cart" }),
+        _vm._v(" "),
+        _c("p", { staticClass: "h6 p-5" }, [_vm._v("Cart is empty")])
+      ])
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -67670,41 +67750,79 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "row" },
-    _vm._l(_vm.items, function(item) {
-      return _c(
-        "div",
-        {
-          staticClass: "card col-xl-3 col-4",
-          on: {
-            click: function($event) {
-              return _vm.onClickItem(item)
-            }
-          }
-        },
-        [
-          _c("div", { staticClass: "card-body text-center" }, [
-            _c("img", {
-              staticClass: "img-fluid",
-              staticStyle: { height: "90px" },
-              attrs: {
-                src:
-                  "https://app.oderje.com/images/product/" +
-                  (item.product.img ? item.product.img : "default.jpeg")
+    {
+      staticClass: "row",
+      class: {
+        "h-100 notFound": _vm.getItems.length == 0 || _vm.items.length == 0
+      }
+    },
+    [
+      _vm.getItems.length != 0 && _vm.items.length == 0
+        ? _c("div", { staticClass: "w-100 text-center my-auto" }, [_vm._m(0)])
+        : _vm._e(),
+      _vm._v(" "),
+      _vm.getItems.length == 0
+        ? _c("div", { staticClass: "w-100 text-center my-auto" }, [_vm._m(1)])
+        : _vm._e(),
+      _vm._v(" "),
+      _vm._l(_vm.items, function(item) {
+        return _c(
+          "div",
+          {
+            staticClass: "card col-xl-3 col-4",
+            on: {
+              click: function($event) {
+                return _vm.onClickItem(item)
               }
-            }),
-            _vm._v(" "),
-            _c("p", { staticClass: "card-text" }, [
-              _vm._v(_vm._s(item.product.name))
+            }
+          },
+          [
+            _c("div", { staticClass: "card-body text-center" }, [
+              _c("img", {
+                staticClass: "img-fluid",
+                staticStyle: { height: "90px" },
+                attrs: {
+                  src:
+                    "https://app.oderje.com/images/product/" +
+                    (item.product.img ? item.product.img : "default.jpeg")
+                }
+              }),
+              _vm._v(" "),
+              _c("p", { staticClass: "card-text" }, [
+                _vm._v(_vm._s(item.product.name))
+              ])
             ])
-          ])
-        ]
-      )
-    }),
-    0
+          ]
+        )
+      })
+    ],
+    2
   )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "text-muted" }, [
+      _c("i", { staticClass: "fas fa-10x fa-not-equal" }),
+      _vm._v(" "),
+      _c("p", { staticClass: "h4 p-5" }, [
+        _vm._v("Searched product does not exist")
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("span", { staticClass: "text-muted" }, [
+      _c("i", { staticClass: "fas fa-10x fa-box-open" }),
+      _vm._v(" "),
+      _c("p", { staticClass: "h4 p-5" }, [_vm._v("No item available")])
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -79995,7 +80113,8 @@ var app = new vue__WEBPACK_IMPORTED_MODULE_0___default.a({
   data: {
     showPayment: false,
     panelProduct: true,
-    panelCalc: false
+    panelCalc: false,
+    searchBox: ""
   },
   methods: {
     changeURL: function changeURL(url) {
@@ -80009,6 +80128,11 @@ var app = new vue__WEBPACK_IMPORTED_MODULE_0___default.a({
         this.panelProduct = false;
         this.panelCalc = true;
       }
+    }
+  },
+  watch: {
+    searchBox: function searchBox(val) {
+      this.$root.$emit('SearchItem', val);
     }
   }
 });

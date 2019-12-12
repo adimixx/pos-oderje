@@ -88,15 +88,31 @@ class CashierController extends Controller
             if (isset($ord['item']['id'])) {
                 $pbm = ojdb_product_business_merchant::find($ord['item']['id']);
                 $pbm->quantity -= $ord['quantity'];
-                $product = $pbm->product;
+                $price = $pbm->product->price;
                 $data[] = [
                     'pbm_id' => $ord['item']['id'],
                     'quantity' => $ord['quantity'],
-                    'bill_id' => $bill->bill_id
+                    'bill_id' => $bill->bill_id,
+                    'order_type' => 'product-counter',
+                    'order_date' => now(),
+                    'manual_price' => null
                 ];
                 $pbm->save();
             }
-            $total += ($product->p_price * $ord['quantity']);
+
+            else{
+                $price = $ord['item']['product']['price']*100;
+                $data[] = [
+                    'pbm_id' => null,
+                    'quantity' => $ord['quantity'],
+                    'bill_id' => $bill->bill_id,
+                    'order_type' => 'custom-counter',
+                    'order_date' => now(),
+                    'manual_price' => $price
+                ];
+            }
+
+            $total += ($price * $ord['quantity']);
         }
 
         $tax = ($total * $taxSetting) * 100;

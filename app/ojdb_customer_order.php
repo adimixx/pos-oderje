@@ -17,7 +17,7 @@ class ojdb_customer_order extends Model
         $this->order_status = "PAID";
     }
 
-    protected $fillable = ["c_id", "pbm_id", "ppbm_id", "quantity", "order_date", "order_received_date", "order_status", "bill_id"];
+    protected $fillable = ["c_id", "pbm_id", "ppbm_id", "quantity", "order_date", "order_received_date", "order_status", "bill_id","manual_price"];
 
     public function linkBill(){
         return $this->belongsTo(ojdb_bill::class,'bill_id');

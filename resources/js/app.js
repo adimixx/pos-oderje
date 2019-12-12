@@ -44,21 +44,25 @@ const app = new Vue({
     data: {
         showPayment: false,
         panelProduct: true,
-        panelCalc:false
+        panelCalc:false,
+        searchBox: ""
     },
     methods: {
         changeURL: function (url) {
             window.location = url;
         },
         changePosPanel: function (panelid) {
-            if (panelid == 1){
-                this.panelProduct= true;
+            if (panelid == 1) {
+                this.panelProduct = true;
                 this.panelCalc = false;
-            }
-            else  if (panelid == 2){
-                this.panelProduct= false;
+            } else if (panelid == 2) {
+                this.panelProduct = false;
                 this.panelCalc = true;
             }
+        }
+    },watch:{
+        searchBox: function (val) {
+            this.$root.$emit('SearchItem', val);
         }
     }
 });

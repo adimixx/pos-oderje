@@ -13,7 +13,10 @@
     </b-modal>
 
     <div class="row mx-0 h-100" id="cashierSide">
-        <div class="col-1 py-5 px-0 d-flex align-items-start flex-column text-center bg-dark">
+        <div class="col-1 p-0 d-flex align-items-start flex-column text-center bg-dark">
+            <div class="my-5">
+                <img src="/assets/img/logo-oderje.png" class="w-100">
+            </div>
             <div class="w-100 py-3 border border-light border-left-0 border-right-0" @click="changeURL('{{route('home')}}')">
                 <span class="text-primary">
                     <i class="fas fa-3x fa-bars"></i>
@@ -47,10 +50,10 @@
             </div>
         </div>
 
-        <div class="col-6 p-0 d-flex align-items-start flex-column">
+        <div class="col-6 p-0 h-100 d-flex align-items-start flex-column">
                 <cart-reset></cart-reset>
             <div class="text-center w-100 p-0">
-                <input class="form-control" placeholder="Search">
+                <input class="form-control" placeholder="Search" v-show="panelProduct" v-model="searchBox">
             </div>
             <div class="card my-0 flex-grow-1 overflow-auto w-100">
                 <div class="card-body">
@@ -60,7 +63,7 @@
             </div>
         </div>
 
-        <div class="col-5 p-0 d-flex flex-column">
+        <div class="col-5 p-0 h-100 d-flex flex-column">
             <div class="flex-grow-1 overflow-hidden">
                 <div class="full d-flex flex-column h-100">
                     <div class="card-header text-center py-4">
@@ -72,9 +75,7 @@
                     </div>
 
                     <div class="card flex-grow-1 overflow-auto">
-                        <div class="card-body p-0">
-                            <cart-list></cart-list>
-                        </div>
+                        <cart-list></cart-list>
                     </div>
                 </div>
             </div>

@@ -81,8 +81,6 @@
                 this.calculatorDisplay = Number(this.priceCalculated).toFixed(2);
                 if (this.isQuantity) {
                     this.calculatorDisplay += " x ";
-                }
-                if (this.quantity > 1) {
                     this.calculatorDisplay += this.quantity;
                 }
             },

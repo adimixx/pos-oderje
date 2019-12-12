@@ -19384,3 +19384,7 @@ body > * {
   height: 80px;
 }
 
+.notFound {
+  opacity: 0.3;
+}
+
