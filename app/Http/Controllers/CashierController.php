@@ -83,12 +83,14 @@ class CashierController extends Controller
         $total = 0;
 
         $bill = new ojdb_bill();
+        $bill->device_id = device::where('uuid',Cookie::get('uuid'))->first()->id;
+        $bill->user_id = \auth()->user()->getAuthIdentifier();
 
         foreach ($order as $ord) {
             if (isset($ord['item']['id'])) {
                 $pbm = ojdb_product_business_merchant::find($ord['item']['id']);
-                $pbm->quantity -= $ord['quantity'];
-                $price = $pbm->product->price;
+                $pbm->quantity = $pbm->quantity - $ord['quantity'];
+                $price = $pbm->product->p_price*100;
                 $data[] = [
                     'pbm_id' => $ord['item']['id'],
                     'quantity' => $ord['quantity'],
@@ -115,8 +117,8 @@ class CashierController extends Controller
             $total += ($price * $ord['quantity']);
         }
 
-        $tax = ($total * $taxSetting) * 100;
-        $total = $total * 100;
+        $tax = ($total * $taxSetting);
+        $total = $total;
 
         $transaction = new ojdb_transaction();
         $transaction->type = "CASH";

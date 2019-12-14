@@ -17,6 +17,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('manage_user/list', 'UserManagementController@list')->name('list');
-Route::post('/manage_user/add', 'UserManagementController@register')->name('register');
+Route::get('manage_user/list', 'UserManagementController@list')->name('userList');
+Route::post('/manage_user/add', 'UserManagementController@register')->name('userRegister');
+
+Route::get('manage_machine/list', 'MachineManagementController@list')->name('machineList');
+
 

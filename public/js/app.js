@@ -2148,7 +2148,6 @@ __webpack_require__.r(__webpack_exports__);
     moneyPress: function moneyPress(item) {
       if (item === true) {
         this.UnpaidBalance = this.inputCashNumeric - Number(this.totalPrice);
-        console.dir(this.cartList);
 
         if (this.UnpaidBalance < 0) {
           this.UnpaidBalance = Number(this.UnpaidBalance * -1).toFixed(2);

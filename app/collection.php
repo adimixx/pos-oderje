@@ -11,13 +11,10 @@ class collection extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-
-        $this->device_id = device::where('uuid',Cookie::get('uuid'))->first()->id;
-        $this->user_id = \auth()->user()->getAuthIdentifier();
     }
 
     protected $fillable = [
-        'transaction_id'
+        'transaction_id','device_id'
     ];
 
     public function user(){
