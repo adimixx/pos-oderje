@@ -13,11 +13,6 @@ class ojdb_bill extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-        $Nowdate = now();
-        $this->bill_date = $Nowdate;
-        $this->bill_reference = "OJ" . str_replace(" ","", str_replace(":","",str_replace("-","",(string)$Nowdate)));
-
-        $this->save();
     }
 
     public function linkCustomerOrder(){

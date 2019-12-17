@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\collection;
+use App\device;
 use App\ojdb_bill;
 use App\ojdb_business;
 use App\ojdb_customer_order;
@@ -13,6 +14,7 @@ use App\users_merchant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Cookie;
 
 class CashierController extends Controller
 {
@@ -83,8 +85,11 @@ class CashierController extends Controller
         $total = 0;
 
         $bill = new ojdb_bill();
-        $bill->device_id = device::where('uuid',Cookie::get('uuid'))->first()->id;
-        $bill->user_id = \auth()->user()->getAuthIdentifier();
+        $Nowdate = now();
+        $bill->bill_date = $Nowdate;
+        $bill->bill_reference = "OJ" . str_replace(" ","", str_replace(":","",str_replace("-","",(string)$Nowdate)));
+
+        $bill->save();
 
         foreach ($order as $ord) {
             if (isset($ord['item']['id'])) {
@@ -133,6 +138,8 @@ class CashierController extends Controller
         $collection = new collection();
         $collection->bill_id = $bill->bill_id;
         $collection->money_in = $moneyin;
+        $collection->device_id = device::where('uuid',Cookie::get('uuid'))->first()->id;
+        $collection->user_id = \auth()->user()->getAuthIdentifier();
         $collection->save();
 
         return array("status" => "ok");

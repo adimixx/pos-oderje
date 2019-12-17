@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\ojdb_business;
 use App\ojdb_merchant;
 use App\User;
+use App\user_log;
 use App\v2tpdev_pruser;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -59,7 +60,7 @@ class UserManagementController extends Controller
 
         $validatedRequest = (object)$request->validate([
             'id' => 'required|numeric',
-            'username' => '',
+            'username' => 'alpha_dash',
             'password' => '',
             'role' => 'required|numeric',
             'type' => 'required|numeric',
@@ -107,5 +108,80 @@ class UserManagementController extends Controller
 
         if (count($error) !== 0) return response()->json(['message' => 'The given data was invalid', 'errors' => $error], 422);
         else return response()->json(['status' => 'ok', 'data' => $data]);
+    }
+
+    public function update(Request $request)
+    {
+        /* id = PRUSER UserID
+         * */
+
+        $validatedRequest = (object)$request->validate([
+            'id' => 'required|numeric',
+            'pos_user_id' => 'required|numeric',
+            'username' => 'alpha_dash',
+            'password' => ''
+        ]);
+
+        $error = [];
+
+        $pos_user = User::find($validatedRequest->pos_user_id);
+        $pruser = v2tpdev_pruser::find($validatedRequest->id);
+        if (!isset($pruser)) {
+            $error['id'] = ['User does not exist'];
+        } elseif (!isset($pruser->flc_user_group->first()->GROUP_ID)) {
+            $error['id'] = ['Invalid user credentials'];
+        } elseif (is_null($pos_user)){
+            $error['pos_user_id'] = ['POS User does not exist'];
+        }
+        elseif (isset($validatedRequest->username) && !is_null(User::where('username',$validatedRequest->username)->first())){
+            $error['username'] = ['Username Already Exists'];
+        }
+        else {
+            //Update user
+            if (isset($validatedRequest->username)) {
+                $pos_user->username = $validatedRequest->username;
+            }
+            if (isset($validatedRequest->password)) {
+                $pos_user->password = Hash::make($validatedRequest->password);
+            }
+
+            $pos_user->save();
+        }
+
+        if (count($error) !== 0) return response()->json(['message' => 'The given data was invalid', 'errors' => $error], 422);
+        else return response()->json(['status' => 'ok', 'data' => $pos_user]);
+    }
+
+    public function delete(Request $request)
+    {
+        /* id = PRUSER UserID
+         * */
+
+        $validatedRequest = (object)$request->validate([
+            'id' => 'required|numeric',
+            'pos_user_id' => 'required|numeric'
+        ]);
+
+        $error = [];
+
+        $pos_user = User::find($validatedRequest->pos_user_id);
+        $pruser = v2tpdev_pruser::find($validatedRequest->id);
+        if (!isset($pruser)) {
+            $error['id'] = ['User does not exist'];
+        } elseif (!isset($pruser->flc_user_group->first()->GROUP_ID)) {
+            $error['id'] = ['Invalid user credentials'];
+        } elseif (is_null($pos_user)){
+            $error['pos_user_id'] = ['POS User does not exist'];
+        }
+        elseif (!is_null(user_log::where('user_id',$validatedRequest->id))){
+            $error['pos_user_id'] = ['User has logged into POS. Cannot delete user'];
+        }
+
+        else {
+            $pos_user->delete();
+        }
+
+        if (count($error) !== 0) return response()->json(['message' => 'The given data was invalid', 'errors' => $error], 422);
+        else return response()->json(['status' => 'ok', 'data' => $pos_user]);
     }
 }
