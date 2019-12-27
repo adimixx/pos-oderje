@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Mike42\Escpos\PrintConnectors\CupsPrintConnector;
 use Webpatser\Uuid\Uuid;
 use Mike42\Escpos\PrintConnectors\FilePrintConnector;
 use Mike42\Escpos\Printer;
@@ -40,11 +41,11 @@ class LoginController extends Controller
 
     public function showLoginForm(Request $request)
     {
-        $connector = new FilePrintConnector("php://stdout");
+        $connector = new CupsPrintConnector("Hoin");
         $printer = new Printer($connector);
-        $printer -> text("Hello World!\n");
-        $printer -> cut();
-        $printer -> close();
+        $printer->text("jdjdjdjdjdjdjjdjdjd\n");
+        $printer->cut();
+        $printer->close();
 
 
         $merchantCookie = $request->cookie('merchant');
@@ -89,7 +90,7 @@ class LoginController extends Controller
     {
         $credentials = null;
         $username = $request->username;
-        if (count(User::role('Business Admin')->where('username', $username)->get()) != 0 || count(User::role('Merchant Admin')->where('username', $username)->get()) != 0|| count(User::role('Super Admin')->where('username', $username)->get()) != 0) {
+        if (count(User::role('Business Admin')->where('username', $username)->get()) != 0 || count(User::role('Merchant Admin')->where('username', $username)->get()) != 0 || count(User::role('Super Admin')->where('username', $username)->get()) != 0) {
             $credentials = [
                 'username' => $username,
                 'password' => $request->password,
@@ -158,11 +159,12 @@ class LoginController extends Controller
         return $this->sendFailedLoginResponse($request);
     }
 
-    public function logout (Request $request){
+    public function logout(Request $request)
+    {
         $user = Auth::user();
         $userlog = $user->userlog()->where('log_out', false)->first();
 
-        if (!is_null($userlog->start_money)){
+        if (!is_null($userlog->start_money)) {
             $collection = $user->collection()->where('created_at', '>=', $userlog->created_at)->with('bill.transaction')->get();
             $total = 0;
 
@@ -171,15 +173,13 @@ class LoginController extends Controller
             }
 
             $totalCash = $total + $userlog->start_money;
-            if (is_null($userlog->end_money) && !isset($request->start)){
-                $totalCash = $totalCash/100;
-                $total = $total/100;
+            if (is_null($userlog->end_money) && !isset($request->start)) {
+                $totalCash = $totalCash / 100;
+                $total = $total / 100;
 
                 return view('CashierPanel_EndMoney', compact('total', 'totalCash'));
-            }
-
-            else{
-                $validated = $request->validate(['start'=>'required|numeric']);
+            } else {
+                $validated = $request->validate(['start' => 'required|numeric']);
                 $end = ((integer)$validated['start']);
 
                 $userlog->end_money = $end;
