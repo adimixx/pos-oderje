@@ -10,7 +10,7 @@ class ojdb_merchant extends Model
     protected $primaryKey = 'm_id';
 
     public function PRUSER(){
-        return $this->hasMany(v2tpdev_pruser::class);
+        return $this->belongsTo(v2tpdev_pruser::class);
     }
 
     public function Business(){

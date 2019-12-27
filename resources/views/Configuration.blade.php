@@ -10,7 +10,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            @isset($currentSetting)
+                            @isset($currentSetting['business'])
                                 <div class="col-lg-6">
                                     <div class="text-left">
                                         <h5 class="font-weight-bold text-primary">Business Profile</h5>
@@ -103,15 +103,17 @@
                                     </select>
                                 </div>
 
-                                <div class="col-lg-3">
-                                    <label for="business" class="col-form-label-lg font-weight-bold text-primary">Business
-                                        Profile</label>
-                                </div>
-                                <div class="col-lg-9">
-                                    <p id="business" class="form-control-lg">{{$business->b_name}}</p>
-                                </div>
+                                @isset($business)
+                                    <div class="col-lg-3">
+                                        <label for="business" class="col-form-label-lg font-weight-bold text-primary">Business
+                                            Profile</label>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <p id="business" class="form-control-lg">{{$business->b_name}}</p>
+                                    </div>
+                                @endisset
 
-                                @if(count($merchant) !== 0)
+                                @isset($merchant)
                                     <div class="col-lg-3">
                                         <label for="merchant" class="col-form-label-lg font-weight-bold text-primary">Merchant
                                             Profile</label>
@@ -124,7 +126,7 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                @endif
+                                @endisset
                             </div>
 
                             <div class="row m-3">

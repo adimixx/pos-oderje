@@ -26,6 +26,7 @@
     },
     "dependencies": {
         "bootstrap-vue": "^2.1.0",
-        "font-awesome": "^4.7.0"
+        "font-awesome": "^4.7.0",
+        "qrious": "^4.0.2"
     }
 }

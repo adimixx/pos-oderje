@@ -11,7 +11,7 @@ class ojdb_business extends Model
 
     public function PRUSER()
     {
-        return $this->hasMany(v2tpdev_pruser::class);
+        return $this->belongsTo(v2tpdev_pruser::class);
     }
 
     public function Merchant()

@@ -23,12 +23,10 @@ class ConfigurationController extends Controller
         $machineType = machine_type::all();
         if (in_array("Business Admin", Auth::user()->getRoleNames()->toArray())) {
             $business = Auth::user()->business()->first();
-            $merchant = $business->merchant()->get();
-        }
-
-        else if(in_array("Merchant Admin", Auth::user()->getRoleNames()->toArray())) {
+            $merchant = null;
+        } else if (in_array("Merchant Admin", Auth::user()->getRoleNames()->toArray())) {
             $merchant = Auth::user()->merchant()->first();
-            $business = $merchant->Business()->first();
+            $business = null;
         }
 
         $machine = $request->cookie('machine');
@@ -38,11 +36,11 @@ class ConfigurationController extends Controller
 
         if ($machine !== null) {
             $currentSetting = array(
-                'business' => $business->find($businessCookie),
                 'machine' => $machineType[$machine - 1]
             );
 
-            if (count($merchant) !== 0) $currentSetting['merchant'] = $merchant->find($merchantCookie);
+            if (isset($business)) $currentSetting['business'] = $business->find($businessCookie);
+            if (isset($merchant)) $currentSetting['merchant'] = $merchant->find($merchantCookie);
         }
         return view('Configuration', compact('machineType', 'business', 'merchant', 'currentSetting'));
     }
@@ -54,36 +52,21 @@ class ConfigurationController extends Controller
         $lifetime = time() + 60 * 60 * 24 * 365;
 
         $business = Auth::user()->business()->first();
-        if (!isset($business)) {
-            $merchant = Auth::user()->merchant()->first();
-            $business = $merchant->Business()->first();
+        if (isset($business)) {
+            Cookie::queue('business', $business->b_id, $lifetime);
+            $device->business_id = $business->b_id;
         } else {
-            $merchant = $business->merchant()->get();
-
-            if (count($merchant) !== 0) {
-                if (!isset($request->merchant)) {
-                    return redirect()->route('conf');
-                }
-
-                $merchant = $merchant->find($request->merchant);
-                if ($merchant === null) {
-                    return redirect()->route('conf');
-                }
+            $merchant = Auth::user()->merchant()->first();
+            if (!isset($request->merchant)) {
+                return redirect()->route('conf');
             }
-        }
-
-        Cookie::queue('business', $business->b_id, $lifetime);
-        $device->business_id = $business->b_id;
-
-        if (isset($request->merchant)) {
             Cookie::queue('merchant', $merchant->m_id, $lifetime);
             $device->merchant_id = $merchant->m_id;
         }
 
         Cookie::queue('machine', $request->machine, $lifetime);
         $device->machine_type = $request->machine;
-
-        $device->name = "test";
+        $device->name = 'POS ' . (isset($business)) ? (device::where('business_id', $business->b_id)->count() + 1) . '-' . $business->b_name : (device::where('merchant_id', $merchant->m_id)->count() + 1) . '-' . $merchant->m_name;
         $device->status = "OK";
         $device->save();
 

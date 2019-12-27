@@ -61,6 +61,10 @@
                     </div>
                 </div>
             </div>
+
+            <div class="col" v-if="method===2">
+                <canvas id="qrcode" class="border border-warning"></canvas>
+            </div>
         </div>
 
         <div class="text-center" v-if="!viewItem">
@@ -83,6 +87,13 @@
                 this.calculateTotal();
             });
             this.$root.$emit('GetCartList');
+
+            var qr = new QRious({
+                element: document.getElementById('qrcode'),
+                background:'white',
+                foreground:'#b16100',
+                value: 'test.je'
+            });
         },
         data() {
             return {
@@ -109,7 +120,6 @@
                     for (var i = 0; i < this.cartList.length; i++) {
                         this.totalPrice += (this.cartList[i].quantity * this.cartList[i].item.product.price);
                     }
-
                     this.totalPrice = Number(this.totalPrice + (this.totalPrice * this.taxset)).toFixed(2);
                     this.viewItem = true;
                 }
