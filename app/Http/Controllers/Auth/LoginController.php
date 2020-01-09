@@ -14,8 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Mike42\Escpos\PrintConnectors\CupsPrintConnector;
 use Webpatser\Uuid\Uuid;
-use Mike42\Escpos\PrintConnectors\FilePrintConnector;
-use Mike42\Escpos\Printer;
 
 class LoginController extends Controller
 {
@@ -41,13 +39,6 @@ class LoginController extends Controller
 
     public function showLoginForm(Request $request)
     {
-        $connector = new CupsPrintConnector("Hoin");
-        $printer = new Printer($connector);
-        $printer->text("jdjdjdjdjdjdjjdjdjd\n");
-        $printer->cut();
-        $printer->close();
-
-
         $merchantCookie = $request->cookie('merchant');
         $businessCookie = $request->cookie('business');
         $machineOwner = null;

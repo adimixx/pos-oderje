@@ -25,6 +25,8 @@ Route::post('/cashier', 'CashierController@recordStartMoney')->name('startMoney'
 Route::get('/cashier/list', 'CashierController@listItem')->name('cashierList');
 Route::post('/cashier/save', 'CashierController@transactionRecord')->name('transactionRecord');
 
+Route::get('/receipt/print', 'ReceiptController@printReceipt')->name('printReceipt');
+
 Route::get('/configuration', 'ConfigurationController@index')->name('conf');
 Route::post('/configuration', 'ConfigurationController@indexPOST')->name('confPOST');
 
